@@ -24,6 +24,16 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ): void {
+  // Handle JSON parsing errors
+  if (err instanceof SyntaxError && 'body' in err) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid JSON format',
+      error: 'INVALID_JSON'
+    });
+    return;
+  }
+
   // Default error values
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
