@@ -1,0 +1,136 @@
+# OSINT Platform MVP Development Rules
+
+## Core Development Philosophy
+- Always write tests FIRST, then implement code to make tests pass
+- Use Test-Driven Development (TDD) for all features across all 14 sprints
+- Write code incrementally in small chunks with Edit-Test loops
+- Commit frequently to git - don't accumulate too many uncommitted changes
+- Use context7.com for latest documentation when needed
+- Work in phases: plan → failing test → minimal implementation → passing test → commit
+
+## Code Quality Standards
+- Use TypeScript with strict mode enabled throughout the project
+- Follow consistent project structure and naming conventions
+- Include proper error handling and input validation for all endpoints
+- Add comprehensive JSDoc comments for all public functions
+- Ensure all tests pass before moving to next increment
+- Prefer explicit imports over wildcard imports
+- Use async/await over .then() for promises
+- Validate all inputs using Joi or similar validation library
+
+## Testing Requirements
+- Jest + Supertest for backend API testing (React Testing Library for frontend later)
+- Minimum 80% test coverage for new code
+- Test both success and error scenarios (especially auth and data validation)
+- Include integration tests for all API endpoints
+- Run tests after every code change: npm test
+- Write edge case tests (null, undefined, empty strings, invalid types)
+- Mock external services appropriately in unit tests
+
+## Security & OSINT Platform Standards
+- Never log sensitive data (passwords, tokens, user locations, PII)
+- Use bcrypt for password hashing with appropriate salt rounds (10+ for production)
+- Implement rate limiting on authentication and posting endpoints
+- Validate geospatial coordinates (lat: -90 to 90, lng: -180 to 180)
+- Use prepared statements for database queries to prevent SQL injection
+- Handle CORS properly for frontend integration
+- JWT tokens must have proper expiration and security practices
+- All user-generated content must be sanitized
+
+## Database & PostGIS Standards
+- Use PostGIS-enabled PostgreSQL for all geospatial features
+- Include proper indexes for performance (especially on location queries)
+- Use transactions for multi-table operations
+- Use migrations for all schema changes
+- Never expose internal database errors to clients
+- Validate foreign key relationships
+- Use connection pooling for performance optimization
+
+## Git Workflow
+- Make small, semantic commits after each working feature
+- Use conventional commit messages: feat(scope)/fix(scope)/test(scope)/docs/refactor
+- Include sprint/feature references: "feat(auth): add user registration - Sprint 1"
+- Never commit failing tests or broken code
+- Push working increments frequently
+- Commit after each phase completion in implementation plans
+
+## API Design Standards (All Sprints)
+- RESTful endpoint naming conventions (/api/v1/resource)
+- Consistent JSON response structure with success/error patterns
+- Include comprehensive request/response validation
+- Use proper HTTP methods and status codes (400, 401, 403, 404, 409, 500)
+- Include pagination for list endpoints (posts, comments, notes)
+- Implement proper error responses with meaningful messages
+- Rate limiting on write operations (posts, votes, comments)
+
+## Context Management
+- Reference @instructions.md frequently for current sprint requirements
+- Keep responses concise and focused on the current task
+- Ask clarifying questions when requirements are unclear
+- Suggest alternative solutions when appropriate
+- Use @filename to reference specific files in context
+- Start new chat when context becomes too long (>15 exchanges)
+
+## File Organization & Architecture
+- Follow established folder structure: controllers/services/routes/utils/middleware
+- Place tests in /tests directory with descriptive, feature-based names
+- Keep environment config in .env files (never commit actual .env)
+- Use proper TypeScript imports/exports with absolute paths where possible
+- Organize routes by domain (auth, posts, users, community-notes)
+- Keep controllers thin - business logic belongs in services
+- Database schemas and migrations in /database directory
+
+## Error Handling & Logging
+- Always include proper error responses with appropriate HTTP status codes
+- Log errors with sufficient context for debugging (but never sensitive data)
+- Handle database connection errors gracefully with retries
+- Provide meaningful error messages to frontend without exposing internals
+- Use global error middleware for unhandled exceptions
+- Include request IDs for error tracing in production
+
+## Development Environment & Tools
+- Use Docker for consistent development across team
+- Ensure hot reloading works for all development changes
+- Environment variables must match instructions.md specifications
+- Include health check endpoints for monitoring and Docker health checks
+- Use nodemon for development server auto-restart
+- Maintain Docker Compose for full stack development
+
+## Performance & Optimization
+- Include response time considerations for API endpoints
+- Use database query optimization (EXPLAIN ANALYZE for complex queries)
+- Implement appropriate caching strategies (Redis for sessions later)
+- Monitor memory usage in long-running processes
+- Use connection pooling for database connections
+- Optimize Docker images for faster builds and smaller size
+
+## Documentation Standards
+- Update README.md for any new setup steps or requirements
+- Document all environment variables in .env.example with descriptions
+- Include clear API endpoint documentation with request/response examples
+- Document any breaking changes in commit messages
+- Maintain inline code documentation for complex business logic
+
+## Allowed Commands
+- Any test commands: npm test, jest, vitest, npm run test:watch
+- Build commands: npm run build, tsc, npm run dev, npm start
+- File operations: touch, mkdir, cp, mv, ls, cat, chmod
+- Git operations: git add, git commit, git status, git log, git push
+- Docker operations: docker-compose up, docker ps, docker logs, docker exec
+- Database operations: psql, pg_dump, migration commands
+- Package management: npm install, npm update, npm audit
+
+## AI Development Workflow
+- Explain reasoning before implementing complex logic or architectural decisions
+- Ask for confirmation before major changes that affect multiple files
+- Provide multiple solutions when trade-offs exist (performance vs simplicity)
+- Reference external documentation when standards are unclear
+- Break complex features into smaller, testable increments
+- Use chain-of-thought reasoning for debugging complex issues
+
+## Sprint Progression Rules
+- Complete current sprint deliverables before moving to next sprint
+- Ensure all previous sprint functionality still works when adding new features
+- Maintain backward compatibility unless explicitly required to break it
+- Test integration between sprints (auth + posts, posts + community notes)
+- Document any dependencies between sprint features

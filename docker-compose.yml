@@ -1,0 +1,98 @@
+services:
+  # PostgreSQL database with PostGIS extension
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: osint_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: osint_platform_dev
+      POSTGRES_USER: osint_user
+      POSTGRES_PASSWORD: osint_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - osint_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osint_user -d osint_platform_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: osint_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://osint_user:osint_password@postgres:5432/osint_platform_dev
+      JWT_SECRET: dev-jwt-secret-key-change-in-production
+      JWT_EXPIRES_IN: 24h
+      BCRYPT_SALT_ROUNDS: 10
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+    ports:
+      - "3001:3001"
+    volumes:
+      # Mount source code for hot reloading
+      - ./backend/src:/app/src:ro
+      - ./backend/tests:/app/tests:ro
+      - ./backend/package.json:/app/package.json:ro
+      - ./backend/tsconfig.json:/app/tsconfig.json:ro
+      - ./backend/jest.config.js:/app/jest.config.js:ro
+      # Exclude node_modules to avoid conflicts
+      - /app/node_modules
+    networks:
+      - osint_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Test database for running tests
+  postgres_test:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: osint_postgres_test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: osint_platform_test
+      POSTGRES_USER: osint_user
+      POSTGRES_PASSWORD: osint_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - osint_network
+    profiles:
+      - testing
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osint_user -d osint_platform_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  postgres_test_data:
+    driver: local
+
+networks:
+  osint_network:
+    driver: bridge 
