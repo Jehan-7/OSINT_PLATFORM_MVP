@@ -1,14 +1,6 @@
--- OSINT Platform Database Initialization
--- This script runs when the PostgreSQL container starts for the first time
+-- Migration 001: Create Users Table
+-- Sprint 1 Deliverable: Database Schema for User Authentication
 
--- Enable PostGIS extension for geospatial features
-CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS postgis_topology;
-
--- Verify PostGIS installation
-SELECT PostGIS_Version();
-
--- Sprint 1: Create Users Table for Authentication
 -- Create users table with exact schema from instructions.md
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -32,10 +24,10 @@ COMMENT ON COLUMN users.password_hash IS 'bcrypt hashed password (salt rounds >=
 COMMENT ON COLUMN users.reputation IS 'User reputation score (default: 0)';
 COMMENT ON COLUMN users.created_at IS 'Account creation timestamp';
 
--- Log successful initialization
+-- Verify table creation
 DO $$
 BEGIN
-    RAISE NOTICE 'OSINT Platform database initialized successfully with PostGIS support';
-    RAISE NOTICE 'Users table created with schema: id, username, email, password_hash, reputation, created_at';
-    RAISE NOTICE 'Indexes created: idx_users_username, idx_users_email';
+    RAISE NOTICE 'Users table created successfully with indexes';
+    RAISE NOTICE 'Schema: id (SERIAL), username (VARCHAR(50)), email (VARCHAR(255)), password_hash (VARCHAR(255)), reputation (INTEGER), created_at (TIMESTAMPTZ)';
+    RAISE NOTICE 'Indexes: idx_users_username, idx_users_email';
 END $$; 
