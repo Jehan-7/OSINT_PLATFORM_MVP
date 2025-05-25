@@ -49,20 +49,23 @@ A comprehensive Open Source Intelligence (OSINT) platform for collecting, analyz
   - JWT and Password services with security
   - All database tests passing (8/8)
 
-- **Authentication API**
+- **Authentication API - COMPLETE**
   - User registration endpoint with comprehensive validation
+  - User login endpoint with secure authentication
   - Input validation utility with security rules
   - Rate limiting for authentication endpoints
   - Duplicate checking for username/email
   - Password hashing with bcrypt (salt rounds ≥ 10)
   - JWT token generation and validation
+  - Secure password verification and error handling
 
 - **Testing Framework**
   - Jest + Supertest integration testing
   - TypeScript support
   - Test environment configuration
-  - **74/74 tests passing (100% success rate)**
+  - **84/84 tests passing (100% success rate)**
   - Comprehensive test coverage for all features
+  - Complete authentication flow testing
 
 ### 🔧 Architecture
 
@@ -217,7 +220,14 @@ RATE_LIMIT_MAX_REQUESTS=1000
   - Validation: Username (3-50 chars), Email (valid format), Password (8+ chars with complexity)
   - Rate Limited: 3 attempts per hour per IP
 
-- **POST** `/api/auth/login` (Placeholder - Sprint 2)
+- **POST** `/api/auth/login`
+  - Authenticate user and return JWT token
+  - Body: `{"email": "string", "password": "string"}`
+  - Returns: User data + JWT token
+  - Validation: Email format, Password presence
+  - Rate Limited: 5 attempts per 15 minutes per IP
+  - Security: Generic error messages to prevent enumeration
+
 - **POST** `/api/auth/refresh` (Placeholder - Sprint 2)
 - **POST** `/api/auth/logout` (Placeholder - Sprint 2)
 

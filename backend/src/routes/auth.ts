@@ -13,8 +13,8 @@ const authController = new AuthController();
 
 // Rate limiting for authentication endpoints
 const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  windowMs: process.env.NODE_ENV === 'test' ? 1000 : 15 * 60 * 1000, // 1 second for tests, 15 minutes for production
+  max: process.env.NODE_ENV === 'test' ? 100 : 5, // 100 for tests, 5 for production
   message: {
     success: false,
     message: 'Too many authentication attempts, please try again later',

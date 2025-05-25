@@ -15,6 +15,11 @@ export interface RegistrationInput {
   password: string;
 }
 
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
 /**
  * Validate registration input data
  * @param input - Registration input data
@@ -235,6 +240,32 @@ export function validateTextInput(input: string, maxLength: number = 1000): Vali
   // Check for potentially dangerous content
   if (/<script|javascript:|data:/i.test(trimmed)) {
     errors.push('Input contains potentially dangerous content');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate login input data
+ * @param input - Login input data
+ * @returns ValidationResult - Validation result with errors
+ */
+export function validateLoginInput(input: LoginInput): ValidationResult {
+  const errors: string[] = [];
+
+  // Validate email
+  const emailValidation = validateEmail(input.email);
+  if (!emailValidation.isValid) {
+    errors.push(...emailValidation.errors);
+  }
+
+  // Validate password presence (not strength for login)
+  const passwordValidation = validatePasswordPresence(input.password);
+  if (!passwordValidation.isValid) {
+    errors.push(...passwordValidation.errors);
   }
 
   return {

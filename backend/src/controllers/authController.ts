@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { PasswordService } from '../services/password';
 import { JWTService } from '../services/jwt';
 import { db } from '../services/database';
-import { validateRegistrationInput } from '../utils/validation';
+import { validateRegistrationInput, validateLoginInput } from '../utils/validation';
 
 /**
  * Authentication Controller for OSINT Platform
@@ -146,15 +146,86 @@ export class AuthController {
   }
 
   /**
-   * Login user (placeholder for future implementation)
+   * Login user
    * POST /api/auth/login
    */
   async login(req: Request, res: Response): Promise<void> {
-    res.status(501).json({
-      success: false,
-      message: 'Login endpoint not implemented yet',
-      error: 'NOT_IMPLEMENTED'
-    });
+    try {
+      const { email, password } = req.body;
+
+      // Input validation
+      const validationResult = validateLoginInput({ email, password });
+      if (!validationResult.isValid) {
+        res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: validationResult.errors
+        });
+        return;
+      }
+
+      // Find user by email
+      const userResult = await db.query(
+        'SELECT id, username, email, password_hash, reputation, created_at FROM users WHERE email = $1',
+        [email]
+      );
+
+      if (userResult.rows.length === 0) {
+        // User not found - use generic message to prevent email enumeration
+        res.status(401).json({
+          success: false,
+          message: 'Invalid email or password',
+          error: 'INVALID_CREDENTIALS'
+        });
+        return;
+      }
+
+      const user = userResult.rows[0];
+
+      // Verify password
+      const isPasswordValid = await this.passwordService.verifyPassword(password, user.password_hash);
+      
+      if (!isPasswordValid) {
+        // Invalid password - use generic message to prevent timing attacks
+        res.status(401).json({
+          success: false,
+          message: 'Invalid email or password',
+          error: 'INVALID_CREDENTIALS'
+        });
+        return;
+      }
+
+      // Generate JWT token
+      const token = await this.jwtService.generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email
+      });
+
+      // Return success response (exclude password_hash)
+      res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          reputation: user.reputation,
+          created_at: user.created_at
+        },
+        token
+      });
+
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Generic error response to prevent information leakage
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: 'LOGIN_FAILED'
+      });
+    }
   }
 
   /**

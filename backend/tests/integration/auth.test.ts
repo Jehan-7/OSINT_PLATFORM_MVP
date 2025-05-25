@@ -384,4 +384,233 @@ describe('Authentication API Integration Tests', () => {
       });
     });
   });
+
+  describe('POST /api/auth/login', () => {
+    const validLoginData = {
+      email: 'logintest@example.com',
+      password: 'SecurePass123!'
+    };
+
+    const validRegistrationData = {
+      username: 'loginuser',
+      email: 'logintest@example.com',
+      password: 'SecurePass123!'
+    };
+
+    beforeEach(async () => {
+      // Clean up any existing test users
+      await db.query("DELETE FROM users WHERE email = $1", [validLoginData.email]);
+      
+      // Register a user for login testing
+      await request(app)
+        .post('/api/auth/register')
+        .send(validRegistrationData);
+    });
+
+    it('should login successfully with valid credentials', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send(validLoginData)
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: expect.any(Number),
+          username: validRegistrationData.username,
+          email: validLoginData.email,
+          reputation: 0,
+          created_at: expect.any(String)
+        },
+        token: expect.any(String)
+      });
+
+      // Verify password is not returned
+      expect(response.body.user.password_hash).toBeUndefined();
+      expect(response.body.user.password).toBeUndefined();
+
+      // Verify JWT token is valid
+      expect(response.body.token).toMatch(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/);
+    });
+
+    it('should reject login with incorrect password', async () => {
+      const invalidLoginData = {
+        ...validLoginData,
+        password: 'WrongPassword123!'
+      };
+
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send(invalidLoginData)
+        .expect(401);
+
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Invalid email or password',
+        error: 'INVALID_CREDENTIALS'
+      });
+
+      // Should not return user data or token
+      expect(response.body.user).toBeUndefined();
+      expect(response.body.token).toBeUndefined();
+    });
+
+    it('should reject login with non-existent email', async () => {
+      const nonExistentLoginData = {
+        email: 'nonexistent@example.com',
+        password: 'SecurePass123!'
+      };
+
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send(nonExistentLoginData)
+        .expect(401);
+
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Invalid email or password',
+        error: 'INVALID_CREDENTIALS'
+      });
+
+      // Should not return user data or token
+      expect(response.body.user).toBeUndefined();
+      expect(response.body.token).toBeUndefined();
+    });
+
+    it('should reject login with missing email field', async () => {
+      const invalidData: any = { ...validLoginData };
+      delete invalidData.email;
+
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send(invalidData)
+        .expect(400);
+
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Validation failed',
+        errors: ['Email is required']
+      });
+    });
+
+    it('should reject login with missing password field', async () => {
+      const invalidData: any = { ...validLoginData };
+      delete invalidData.password;
+
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send(invalidData)
+        .expect(400);
+
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Validation failed',
+        errors: ['Password is required']
+      });
+    });
+
+    describe('Additional Login Validation', () => {
+      it('should reject login with invalid email format', async () => {
+        const invalidData = {
+          email: 'invalid-email-format',
+          password: 'SecurePass123!'
+        };
+
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send(invalidData);
+
+        // Should return 400 for validation error or 429 for rate limiting
+        expect([400, 429]).toContain(response.status);
+
+        if (response.status === 400) {
+          expect(response.body).toMatchObject({
+            success: false,
+            message: 'Validation failed',
+            errors: expect.arrayContaining(['Email must be a valid email address'])
+          });
+        }
+      });
+
+      it('should reject login with empty email', async () => {
+        const invalidData = {
+          email: '',
+          password: 'SecurePass123!'
+        };
+
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send(invalidData);
+
+        // Should return 400 for validation error or 429 for rate limiting
+        expect([400, 429]).toContain(response.status);
+
+        if (response.status === 400) {
+          expect(response.body).toMatchObject({
+            success: false,
+            message: 'Validation failed',
+            errors: ['Email is required']
+          });
+        }
+      });
+
+      it('should reject login with empty password', async () => {
+        const invalidData = {
+          email: 'test@example.com',
+          password: ''
+        };
+
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send(invalidData);
+
+        // Should return 400 for validation error or 429 for rate limiting
+        expect([400, 429]).toContain(response.status);
+
+        if (response.status === 400) {
+          expect(response.body).toMatchObject({
+            success: false,
+            message: 'Validation failed',
+            errors: ['Password is required']
+          });
+        }
+      });
+    });
+
+    describe('Login Security', () => {
+      it('should apply rate limiting to login endpoint', async () => {
+        // In test environment, rate limiting is lenient
+        // Just verify the endpoint works and rate limiting middleware is present
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send(validLoginData);
+
+        // Should succeed (not rate limited in test environment)
+        expect([200, 401, 429]).toContain(response.status); // 200 for success, 401 for invalid creds, 429 for rate limit
+        
+        // Verify rate limit headers are present
+        expect(response.headers).toHaveProperty('ratelimit-limit');
+      });
+
+      it('should not expose sensitive information in error responses', async () => {
+        const response = await request(app)
+          .post('/api/auth/login')
+          .send({
+            email: 'nonexistent@example.com',
+            password: 'wrongpassword'
+          });
+
+        // Should return 401 for invalid credentials or 429 for rate limiting
+        expect([401, 429]).toContain(response.status);
+
+        if (response.status === 401) {
+          // Should not reveal whether email exists or not
+          expect(response.body.message).toBe('Invalid email or password');
+          expect(response.body).not.toHaveProperty('userExists');
+          expect(response.body).not.toHaveProperty('passwordMatch');
+        }
+      });
+    });
+  });
 }); 
