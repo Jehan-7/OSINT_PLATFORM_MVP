@@ -134,3 +134,10 @@
 - Maintain backward compatibility unless explicitly required to break it
 - Test integration between sprints (auth + posts, posts + community notes)
 - Document any dependencies between sprint features
+
+## Sprint 2 Specific Standards
+- Posts must include proper geospatial validation (lat: -90 to 90, lng: -180 to 180)
+- Include author information in post responses without exposing sensitive user data
+- Implement pagination with sensible defaults (e.g., 20 posts per page)
+- Ensure public post endpoints don't require authentication
+- Test geospatial edge cases (null coordinates, boundary values)
