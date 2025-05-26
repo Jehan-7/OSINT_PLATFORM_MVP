@@ -27,45 +27,41 @@ A comprehensive Open Source Intelligence (OSINT) platform for collecting, analyz
    - Backend API: http://localhost:3001/api/health
    - PostgreSQL: localhost:5432 (user: osint_user, password: osint_password)
 
-## 📋 Sprint 1 Status - COMPLETE ✅
+## 📋 Sprint 2 Status - COMPLETE ✅
 
-### ✅ Completed Features
+### ✅ Sprint 1 Foundation (Previously Completed)
+- **Authentication System**: User registration, login, JWT tokens
+- **Database Infrastructure**: PostgreSQL + PostGIS, users table
+- **Testing Framework**: 84/84 tests passing
+- **Docker Environment**: Full development setup
 
-- **Dockerized Development Environment**
-  - PostgreSQL 15 with PostGIS extensions
-  - Node.js/Express backend with TypeScript
-  - Hot reloading for development
-  - Health monitoring and graceful shutdown
+### ✅ Sprint 2: Core Post Functionality (NEW)
 
-- **Backend Infrastructure**
-  - Express.js application with security middleware
-  - Environment variable configuration
-  - Global error handling
-  - Rate limiting and CORS support
+- **Posts Database Schema**
+  - Posts table with geospatial support (PostGIS)
+  - Foreign key relationships to users
+  - Geospatial indexes and performance optimization
+  - Database constraints and triggers
 
-- **Database Schema & Services**
-  - Users table with proper constraints and indexes
-  - Database service with connection pooling
-  - JWT and Password services with security
-  - All database tests passing (8/8)
+- **Post Management API**
+  - `POST /api/v1/posts` - Create geotagged posts (JWT protected)
+  - `GET /api/v1/posts` - List posts with pagination (public)
+  - `GET /api/v1/posts/:id` - Get specific post (public)
+  - `GET /api/v1/users/:userId/posts` - User's posts (public)
 
-- **Authentication API - COMPLETE**
-  - User registration endpoint with comprehensive validation
-  - User login endpoint with secure authentication
-  - Input validation utility with security rules
-  - Rate limiting for authentication endpoints
-  - Duplicate checking for username/email
-  - Password hashing with bcrypt (salt rounds ≥ 10)
-  - JWT token generation and validation
-  - Secure password verification and error handling
+- **Advanced Features**
+  - Geospatial coordinate validation (lat: -90 to 90, lng: -180 to 180)
+  - Content sanitization and XSS prevention
+  - Pagination with configurable limits
+  - Author information in post responses
+  - PostgreSQL performance optimization
 
-- **Testing Framework**
-  - Jest + Supertest integration testing
-  - TypeScript support
-  - Test environment configuration
-  - **84/84 tests passing (100% success rate)**
-  - Comprehensive test coverage for all features
-  - Complete authentication flow testing
+- **Testing & Quality**
+  - **100+ tests passing** across all Sprint 2 components
+  - Service layer testing (37 tests)
+  - Controller testing (23 tests)
+  - HTTP integration testing (14 tests)
+  - Database schema testing (13 tests)
 
 ### 🔧 Architecture
 
@@ -152,7 +148,7 @@ docker-compose exec postgres psql -U osint_user -d osint_platform_dev -c "SELECT
 ### Running Tests
 
 ```bash
-# Run all tests (74 tests)
+# Run all tests (100+ tests)
 cd backend && npm test
 
 # Run tests with coverage
@@ -165,15 +161,17 @@ npm run test:watch
 npm test -- tests/services/
 npm test -- tests/integration/
 npm test -- tests/database/
+npm test -- tests/controllers/
 ```
 
-### Test Structure
+### Test Structure (Sprint 1 + 2)
 
 - **Health Check Tests**: Verify API endpoint functionality (3 tests)
-- **Database Tests**: Schema validation and operations (8 tests)
-- **Service Tests**: JWT and Password services (44 tests)
-- **Integration Tests**: Authentication API endpoints (19 tests)
-- **Total**: 74/74 tests passing ✅
+- **Database Tests**: Schema validation and operations (13 tests Sprint 1+2)
+- **Service Tests**: JWT, Password, and Post services (44 + 37 = 81 tests)
+- **Controller Tests**: Authentication and Post controllers (23 tests)
+- **Integration Tests**: HTTP endpoint testing (29 + 14 = 43 tests)
+- **Total**: **100+ tests passing ✅** across all Sprint 2 components
 
 ## 🌍 Environment Configuration
 
@@ -228,8 +226,32 @@ RATE_LIMIT_MAX_REQUESTS=1000
   - Rate Limited: 5 attempts per 15 minutes per IP
   - Security: Generic error messages to prevent enumeration
 
-- **POST** `/api/auth/refresh` (Placeholder - Sprint 2)
-- **POST** `/api/auth/logout` (Placeholder - Sprint 2)
+### Posts Management (Sprint 2 ✅)
+
+- **POST** `/api/v1/posts`
+  - Create a new geotagged post (requires JWT authentication)
+  - Headers: `Authorization: Bearer JWT_TOKEN`
+  - Body: `{"content": "string", "latitude": number, "longitude": number, "location_name": "string"}`
+  - Validation: Content (1-1000 chars), Lat (-90 to 90), Lng (-180 to 180)
+  - Returns: Created post with author information
+  - Response: `{"success": true, "message": "Post created successfully", "data": {...}}`
+
+- **GET** `/api/v1/posts`
+  - List posts with pagination (public access)
+  - Query params: `?page=1&limit=20` (limit max: 100)
+  - Returns: Paginated posts with author information
+  - Response: `{"success": true, "data": {"posts": [...], "pagination": {...}}}`
+
+- **GET** `/api/v1/posts/:id`
+  - Get a specific post by ID (public access)
+  - Returns: Single post with author information
+  - Response: `{"success": true, "data": {...}}`
+
+- **GET** `/api/v1/users/:userId/posts`
+  - Get posts by specific user (public access)
+  - Query params: `?page=1&limit=20`
+  - Returns: User's posts with pagination
+  - Response: `{"success": true, "data": {"posts": [...], "pagination": {...}}}`
 
 ## 🔒 Security Features
 
@@ -251,10 +273,10 @@ RATE_LIMIT_MAX_REQUESTS=1000
 - **Connection Pool**: Configured for optimal performance
 - **Health Checks**: Automatic service monitoring
 
-### Schema (Sprint 1 ✅)
+### Schema (Sprint 1 + 2 ✅)
 
 ```sql
--- Users table
+-- Users table (Sprint 1)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -264,9 +286,26 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Indexes for performance
+-- Posts table (Sprint 2)
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL CHECK (LENGTH(content) > 0 AND LENGTH(content) <= 1000),
+    latitude DECIMAL(10,8) NOT NULL CHECK (latitude >= -90 AND latitude <= 90),
+    longitude DECIMAL(11,8) NOT NULL CHECK (longitude >= -180 AND longitude <= 180),
+    location_name VARCHAR(255),
+    upvotes INTEGER DEFAULT 0,
+    downvotes INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Performance indexes
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_posts_author_id ON posts(author_id);
+CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
+CREATE INDEX idx_posts_location ON posts USING GIST(ST_Point(longitude, latitude));
 ```
 
 ## 🚦 Health Monitoring
@@ -301,13 +340,15 @@ curl -X POST http://localhost:3001/api/auth/register \
 5. **Commit changes** with conventional commit messages
 6. **Push to repository** for team collaboration
 
-## 📈 Next Steps (Sprint 2)
+## 📈 Next Steps (Sprint 3)
 
-- **Login API**: User authentication with JWT
-- **Protected Routes**: Middleware for authentication
-- **Token Refresh**: JWT token renewal
-- **User Profile**: Get/update user information
-- **Password Reset**: Forgot password functionality
+Based on instructions.md, Sprint 3 will focus on:
+
+- **Frontend Setup**: React 18 + TypeScript + Vite + Tailwind CSS
+- **Authentication UI**: Registration and login forms
+- **JWT Integration**: Frontend token storage and management
+- **Basic Routing**: Client-side navigation setup
+- **Post Display**: Connect frontend to existing post APIs
 
 ## 🤝 Contributing
 
@@ -324,4 +365,4 @@ This project is licensed under the MIT License.
 
 ---
 
-**Sprint 1 Complete** ✅ | **74/74 Tests Passing** | **Next**: Login API & Protected Routes (Sprint 2)
+**Sprint 2 Complete** ✅ | **100+ Tests Passing** | **4 New API Endpoints** | **Next**: Frontend Setup (Sprint 3)

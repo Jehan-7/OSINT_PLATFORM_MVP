@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 import { config } from './config/environment';
 import { healthRouter } from './routes/health';
 import { authRoutes } from './routes/auth';
+import postRoutes from './routes/post';
+import userRoutes from './routes/user';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 /**
@@ -45,6 +47,8 @@ function createApp(): express.Application {
   // API routes
   app.use('/api', healthRouter);
   app.use('/api/auth', authRoutes);
+  app.use('/api/v1/posts', postRoutes);
+  app.use('/api/v1/users', userRoutes);
 
   // 404 handler for unknown routes
   app.use(notFoundHandler);
