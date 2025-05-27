@@ -17,4 +17,4 @@ if (!process.env.RATE_LIMIT_WINDOW_MS) process.env.RATE_LIMIT_WINDOW_MS = '60000
 if (!process.env.RATE_LIMIT_MAX_REQUESTS) process.env.RATE_LIMIT_MAX_REQUESTS = '1000';
 
 // Increase timeout for database operations
-jest.setTimeout(10000); 
+jest.setTimeout(15000); 

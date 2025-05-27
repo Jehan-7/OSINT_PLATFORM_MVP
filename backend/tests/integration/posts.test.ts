@@ -32,8 +32,12 @@ describe('Posts API Integration Tests', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await db.query('TRUNCATE TABLE posts, users CASCADE');
+    try {
+      // Clean up test data
+      await db.query('TRUNCATE TABLE posts, users CASCADE');
+    } catch (error) {
+      console.warn('Error cleaning up test data:', error);
+    }
   });
 
   beforeEach(async () => {

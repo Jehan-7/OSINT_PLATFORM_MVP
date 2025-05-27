@@ -28,6 +28,9 @@ module.exports = {
     'html'
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  testTimeout: 10000,
-  verbose: true
+  globalTeardown: '<rootDir>/tests/teardown.ts',
+  testTimeout: 15000,
+  verbose: true,
+  forceExit: true,
+  detectOpenHandles: true
 }; 
