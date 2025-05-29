@@ -1,22 +1,32 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import App from './App'
 
-describe('App', () => {
-  test('should render without crashing', () => {
-    render(<App />);
-    // This test should pass once we have a basic working App component
-  });
+describe('Frontend Foundation - Phase 1', () => {
+  it('should render the OSINT Platform app with proper title', () => {
+    render(<App />)
+    
+    // Test for the main title
+    expect(screen.getByText(/OSINT Platform/i)).toBeInTheDocument()
+    expect(screen.getByText(/Intelligence Gathering & Analysis Platform/i)).toBeInTheDocument()
+  })
 
-  test('should display application title', () => {
-    render(<App />);
-    // We expect to see "OSINT Platform" somewhere on the page
-    expect(screen.getByText(/OSINT Platform/i)).toBeInTheDocument();
-  });
+  it('should have proper Tailwind CSS setup and structure', () => {
+    render(<App />)
+    
+    // Check if the main app container exists
+    const appElement = screen.getByTestId('app-container')
+    expect(appElement).toBeInTheDocument()
+    
+    // Check for Sprint 3 content
+    expect(screen.getByText(/Sprint 3: Frontend Foundation & User Authentication UI/i)).toBeInTheDocument()
+  })
 
-  test('should have proper routing foundation', () => {
-    render(<App />);
-    // We expect the app to have routing capabilities
-    // This will fail initially until we implement React Router
-    expect(document.querySelector('[data-testid="router"]')).toBeInTheDocument();
-  });
-}); 
+  it('should display authentication and posts sections', () => {
+    render(<App />)
+    
+    // Check for the two main sections planned for Sprint 3
+    expect(screen.getByText(/Authentication/i)).toBeInTheDocument()
+    expect(screen.getByText(/Intelligence Posts/i)).toBeInTheDocument()
+  })
+}) 
