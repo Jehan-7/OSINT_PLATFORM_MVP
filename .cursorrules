@@ -1,5 +1,3 @@
-# OSINT Platform MVP Development Rules
-
 ## Core Development Philosophy
 - Always write tests FIRST, then implement code to make tests pass
 - Use Test-Driven Development (TDD) for all features across all 14 sprints
@@ -7,6 +5,7 @@
 - Commit frequently to git - don't accumulate too many uncommitted changes
 - Use context7.com for latest documentation when needed
 - Work in phases: plan → failing test → minimal implementation → passing test → commit
+- Maintain the 253/253 test success rate achieved in Sprint 3 (209 backend + 44 frontend)
 
 ## Code Quality Standards
 - Use TypeScript with strict mode enabled throughout the project
@@ -17,15 +16,20 @@
 - Prefer explicit imports over wildcard imports
 - Use async/await over .then() for promises
 - Validate all inputs using Joi or similar validation library
+- Follow established patterns from Sprint 1-3 that achieved 100% test success
 
 ## Testing Requirements
-- Jest + Supertest for backend API testing (React Testing Library for frontend later)
+- Jest + Supertest for backend API testing
+- React Testing Library + Jest + Vitest for frontend component testing
 - Minimum 80% test coverage for new code
 - Test both success and error scenarios (especially auth and data validation)
 - Include integration tests for all API endpoints
 - Run tests after every code change: npm test
 - Write edge case tests (null, undefined, empty strings, invalid types)
 - Mock external services appropriately in unit tests
+- Use MSW (Mock Service Worker) for frontend API mocking
+- Test user interactions (clicks, form submissions, navigation)
+- Test loading states, error states, and empty states comprehensively
 
 ## Security & OSINT Platform Standards
 - Never log sensitive data (passwords, tokens, user locations, PII)
@@ -36,6 +40,8 @@
 - Handle CORS properly for frontend integration
 - JWT tokens must have proper expiration and security practices
 - All user-generated content must be sanitized
+- Validate all inputs on both client and server side
+- Store JWT tokens securely in localStorage with proper cleanup on logout
 
 ## Database & PostGIS Standards
 - Use PostGIS-enabled PostgreSQL for all geospatial features
@@ -45,14 +51,16 @@
 - Never expose internal database errors to clients
 - Validate foreign key relationships
 - Use connection pooling for performance optimization
+- Maintain backward compatibility with existing schema from Sprint 1-2
 
 ## Git Workflow
 - Make small, semantic commits after each working feature
 - Use conventional commit messages: feat(scope)/fix(scope)/test(scope)/docs/refactor
-- Include sprint/feature references: "feat(auth): add user registration - Sprint 1"
+- Include sprint/feature references: "feat(posts): add feed page - Sprint 4"
 - Never commit failing tests or broken code
 - Push working increments frequently
 - Commit after each phase completion in implementation plans
+- Maintain clean git history with descriptive commit messages
 
 ## API Design Standards (All Sprints)
 - RESTful endpoint naming conventions (/api/v1/resource)
@@ -62,17 +70,144 @@
 - Include pagination for list endpoints (posts, comments, notes)
 - Implement proper error responses with meaningful messages
 - Rate limiting on write operations (posts, votes, comments)
+- Follow established backend API patterns from Sprint 1-2 (209/209 tests passing)
 
-## Context Management
-- Reference @instructions.md frequently for current sprint requirements
-- Keep responses concise and focused on the current task
-- Ask clarifying questions when requirements are unclear
-- Suggest alternative solutions when appropriate
-- Use @filename to reference specific files in context
-- Start new chat when context becomes too long (>15 exchanges)
+## Frontend Development Standards (Enhanced for Sprint 4)
+- Use React 18 + TypeScript + Vite + Tailwind CSS stack (proven in Sprint 3)
+- Follow React Testing Library best practices for component testing
+- Use React hooks and functional components (no class components)
+- Implement proper TypeScript interfaces for all props and state
+- Use Tailwind utility classes for styling (avoid custom CSS)
+- Store authentication state in React Context with localStorage persistence
+- Focus on component composition and reusability for post display
+- Implement proper loading states and error handling for data fetching
+- Use React Context for post data management following established auth patterns
+- Maintain responsive design principles with Tailwind utilities
 
-## File Organization & Architecture
-- Follow established folder structure: controllers/services/routes/utils/middleware
+## Post Display Component Standards (NEW for Sprint 4)
+- Create reusable PostCard component with consistent visual hierarchy
+- Implement proper loading skeleton components for smooth perceived performance
+- Use semantic HTML (article, time, address) for post content structure
+- Handle long content gracefully with proper text wrapping and truncation
+- Include proper ARIA labels for screen reader accessibility
+- Optimize re-rendering with React.memo for post list performance
+- Display post metadata: author, timestamp, location, engagement metrics
+- Handle different post states: loading, success, error, empty
+- Implement responsive design for mobile and desktop viewing
+
+## Layout & Navigation Standards (NEW for Sprint 4)
+- Build responsive Layout component following mobile-first design principles
+- Implement Header component with authentication-aware navigation
+- Use Tailwind utility classes for consistent spacing and typography
+- Handle mobile menu states with proper touch interactions
+- Maintain consistent page structure across all routes
+- Include proper landmark roles (banner, main, navigation) for accessibility
+- Show different navigation based on authentication state (login/logout)
+- Implement smooth transitions between authenticated and unauthenticated states
+
+## State Management for Posts (Enhanced)
+- Implement PostsContext following established AuthContext patterns
+- Use useReducer for complex post loading states (loading, success, error, empty)
+- Include basic caching strategy to reduce redundant API calls
+- Handle pagination state preparation for future infinite scroll features
+- Implement error recovery mechanisms with user-friendly retry options
+- Maintain performance with proper dependency arrays and state updates
+- Follow the same patterns that made AuthContext successful in Sprint 3
+
+## Feed Page Performance Standards (NEW)
+- Implement skeleton loading for better perceived performance during data fetching
+- Use React.memo for PostCard components to prevent unnecessary re-renders
+- Handle empty states with encouraging call-to-action messages
+- Implement proper error boundaries for graceful failure handling
+- Optimize API calls with caching and avoid redundant network requests
+- Test performance with large post lists and loading scenarios
+- Ensure smooth scrolling and interaction on mobile devices
+
+## Mobile-First Responsive Design (Enhanced)
+- Design components mobile-first with Tailwind responsive utilities
+- Test all components at mobile (320px+), tablet (768px+), and desktop (1024px+) breakpoints
+- Implement touch-friendly interactive elements with proper sizing
+- Use responsive typography scales and spacing systems
+- Handle mobile navigation menus with smooth animations
+- Ensure proper viewport meta tag and responsive image handling
+- Test touch interactions and mobile menu functionality
+
+## API Integration for Posts (Enhanced)
+- Follow established authService.ts patterns for postsService.ts
+- Handle all backend post API response types with proper TypeScript interfaces
+- Implement comprehensive error handling for network failures and API errors
+- Use existing HTTP client configuration and error interceptors
+- Parse pagination data correctly for future infinite scroll features
+- Maintain backward compatibility with Sprint 2 backend APIs
+- Create dedicated API service modules (authService.ts, postsService.ts)
+- Handle authentication state with React Context
+- Use environment variables for API base URLs (VITE_API_URL)
+
+## Testing Standards for Sprint 4 (Enhanced)
+- React Testing Library + Jest + Vitest for frontend component testing
+- Test all loading states: skeleton, success, error, and empty states
+- Use React Testing Library for user-centric post interaction testing
+- Mock MSW handlers for all post API endpoints (GET /api/v1/posts, etc.)
+- Test responsive behavior and mobile menu interactions
+- Include accessibility testing with proper ARIA labels and keyboard navigation
+- Test error recovery flows and retry mechanisms comprehensively
+- Test authentication flows end-to-end
+- Minimum 80% test coverage for new frontend code
+- Test user interactions and navigation flows
+- Mock API calls using MSW or jest mocks for services
+
+## User Experience Guidelines (NEW)
+- Provide immediate visual feedback for all user interactions
+- Show meaningful loading states instead of blank screens
+- Display helpful error messages with clear recovery actions
+- Include empty states that encourage user engagement
+- Maintain consistent visual language across authentication and post features
+- Implement smooth page transitions without layout shifts
+- Design for accessibility with proper focus management
+- Ensure fast perceived performance with skeleton loading
+
+## Context Management (Enhanced for Sprint 4)
+- Reference @instructions.md frequently for Sprint 4 requirements
+- Keep focus on post display and basic layout functionality
+- Ask clarifying questions when UI/UX decisions are unclear
+- Maintain consistency with established authentication and component patterns
+- Build upon proven Sprint 3 foundation without breaking existing functionality
+- Reference backend post APIs from Sprint 2 (already working with 209/209 tests)
+- Build upon proven Sprint 3 authentication foundation (44/44 tests passing)
+- Suggest performance optimizations for post list rendering
+
+## File Organization & Architecture (Updated for Sprint 4)
+```
+frontend/src/
+├── components/
+│   ├── ui/              # Existing (Sprint 3) - Button, Input, ErrorDisplay
+│   ├── forms/           # Existing (Sprint 3) - LoginForm, RegisterForm
+│   ├── layout/          # NEW (Sprint 4)
+│   │   ├── Layout.tsx   # Main layout wrapper
+│   │   └── Header.tsx   # Navigation header
+│   └── posts/           # NEW (Sprint 4)
+│       ├── PostCard.tsx     # Individual post display
+│       ├── PostList.tsx     # Posts container component
+│       └── PostSkeleton.tsx # Loading skeleton
+├── pages/
+│   ├── LoginPage.tsx    # Existing (Sprint 3)
+│   ├── RegisterPage.tsx # Existing (Sprint 3)
+│   ├── HomePage.tsx     # Existing (Sprint 3)
+│   └── FeedPage.tsx     # NEW (Sprint 4) - Main deliverable
+├── contexts/
+│   ├── AuthContext.tsx  # Existing (Sprint 3)
+│   └── PostsContext.tsx # NEW (Sprint 4)
+├── services/
+│   ├── api.ts           # Existing (Sprint 3) - HTTP client
+│   └── postsService.ts  # NEW (Sprint 4) - Post API calls
+├── hooks/
+│   ├── useAuth.ts       # Existing (Sprint 3)
+│   └── usePosts.ts      # NEW (Sprint 4)
+└── types/
+    ├── auth.ts          # Existing (Sprint 3)
+    └── posts.ts         # NEW (Sprint 4)
+```
+
 - Place tests in /tests directory with descriptive, feature-based names
 - Keep environment config in .env files (never commit actual .env)
 - Use proper TypeScript imports/exports with absolute paths where possible
@@ -87,6 +222,8 @@
 - Provide meaningful error messages to frontend without exposing internals
 - Use global error middleware for unhandled exceptions
 - Include request IDs for error tracing in production
+- Implement proper error boundaries in React components
+- Handle network failures gracefully with retry mechanisms
 
 ## Development Environment & Tools
 - Use Docker for consistent development across team
@@ -95,14 +232,18 @@
 - Include health check endpoints for monitoring and Docker health checks
 - Use nodemon for development server auto-restart
 - Maintain Docker Compose for full stack development
+- Frontend development server should proxy to backend APIs
+- Ensure CORS is configured properly for frontend-backend communication
 
 ## Performance & Optimization
 - Include response time considerations for API endpoints
 - Use database query optimization (EXPLAIN ANALYZE for complex queries)
-- Implement appropriate caching strategies (Redis for sessions later)
+- Implement appropriate caching strategies (React Context caching for posts)
 - Monitor memory usage in long-running processes
 - Use connection pooling for database connections
 - Optimize Docker images for faster builds and smaller size
+- Implement component memoization to prevent unnecessary re-renders
+- Use efficient data structures for post caching and state management
 
 ## Documentation Standards
 - Update README.md for any new setup steps or requirements
@@ -110,15 +251,18 @@
 - Include clear API endpoint documentation with request/response examples
 - Document any breaking changes in commit messages
 - Maintain inline code documentation for complex business logic
+- Document component props and interfaces with JSDoc comments
+- Include examples of component usage in documentation
 
 ## Allowed Commands
 - Any test commands: npm test, jest, vitest, npm run test:watch
-- Build commands: npm run build, tsc, npm run dev, npm start
+- Build commands: npm run build, tsc, npm run dev, npm start, npm run preview
 - File operations: touch, mkdir, cp, mv, ls, cat, chmod
 - Git operations: git add, git commit, git status, git log, git push
 - Docker operations: docker-compose up, docker ps, docker logs, docker exec
 - Database operations: psql, pg_dump, migration commands
 - Package management: npm install, npm update, npm audit
+- Frontend specific: npm run dev, npm run build, npm run preview
 
 ## AI Development Workflow
 - Explain reasoning before implementing complex logic or architectural decisions
@@ -127,6 +271,8 @@
 - Reference external documentation when standards are unclear
 - Break complex features into smaller, testable increments
 - Use chain-of-thought reasoning for debugging complex issues
+- Follow TDD workflow: failing test → minimal implementation → passing test
+- Commit working increments frequently
 
 ## Sprint Progression Rules
 - Complete current sprint deliverables before moving to next sprint
@@ -134,55 +280,66 @@
 - Maintain backward compatibility unless explicitly required to break it
 - Test integration between sprints (auth + posts, posts + community notes)
 - Document any dependencies between sprint features
+- Maintain the quality standards that achieved 253/253 tests in Sprint 3
 
-## Sprint 2 Specific Standards
-- Posts must include proper geospatial validation (lat: -90 to 90, lng: -180 to 180)
-- Include author information in post responses without exposing sensitive user data
-- Implement pagination with sensible defaults (e.g., 20 posts per page)
-- Ensure public post endpoints don't require authentication
-- Test geospatial edge cases (null coordinates, boundary values)
+## Sprint 4 Specific Standards
+- Posts must display author information without exposing sensitive user data
+- Implement proper loading states for all async operations
+- Handle empty states when no posts exist with encouraging messages
+- Test post display components across different screen sizes
+- Ensure public post endpoints work without authentication
+- Build upon Sprint 2's proven post APIs (GET /api/v1/posts working)
+- Maintain Sprint 3's authentication integration (JWT storage, context patterns)
 
-## Frontend Development Standards (NEW for Sprint 3)
-- Use React 18 + TypeScript + Vite + Tailwind CSS stack
-- Follow React Testing Library best practices for component testing
-- Use React hooks and functional components (no class components)
-- Implement proper TypeScript interfaces for all props and state
-- Use Tailwind utility classes for styling (avoid custom CSS)
-- Store authentication state in React Context with localStorage persistence
+## Sprint 4 Specific Development Commands
+```bash
+# Test new post-related functionality specifically
+cd frontend && npm test -- --testPathPattern="(posts|feed|layout)" --watch
 
-## Frontend Testing Requirements (Enhanced)
-- React Testing Library + Jest for frontend component testing
-- Test user interactions (clicks, form submissions, navigation)
-- Mock API calls using MSW or jest mocks for services
-- Test authentication flows end-to-end
-- Minimum 80% test coverage for new frontend code
+# Build and verify new components work in production
+cd frontend && npm run build && npm run preview
 
-## Frontend-Backend Integration Standards (NEW)
-- Create dedicated API service modules (authService.ts, etc.)
-- Handle authentication state with React Context
-- Implement proper error handling for API failures
-- Use environment variables for API base URLs (VITE_API_URL)
-- Handle loading states and user feedback properly
-- Validate forms on both client and server side
+# Test responsive design manually
+# Use browser dev tools to test mobile (375px), tablet (768px), desktop (1200px)
 
-## Frontend Project Structure (NEW)
-frontend/
-├── src/
-│   ├── components/     # Reusable UI components
-│   ├── pages/         # Route-level components
-│   ├── contexts/      # React contexts (AuthContext)
-│   ├── services/      # API service modules
-│   ├── hooks/         # Custom React hooks
-│   ├── utils/         # Utility functions
-│   └── types/         # TypeScript type definitions
+# Verify backend post APIs are working for frontend integration
+curl http://localhost:3001/api/v1/posts
+
+# Full stack verification
+docker-compose up # Backend + Database
+cd frontend && npm run dev # Frontend development server
+```
+
 ## Development Environment Requirements
 - Node.js 18+ (LTS recommended)
 - npm 9+
 - Docker & Docker Compose
 - PostgreSQL 15+ with PostGIS
 
-## Setup
+## Setup Verification
 ```bash
 # Use Node Version Manager for consistency
 nvm install 20
 nvm use 20
+
+# Verify Sprint 3 completion before starting Sprint 4
+cd backend && npm test                    # Should show 209/209 tests passing
+cd frontend && npm test -- --run         # Should show 44/44 tests passing
+cd frontend && npm run build             # Should build successfully
+
+# Verify development environment  
+docker-compose up --build                # Should start PostgreSQL + Backend
+curl http://localhost:3001/api/health    # Should return healthy status
+
+# Verify frontend development server
+cd frontend && npm run dev               # Should start on http://localhost:3000
+```
+
+## Success Metrics for Sprint 4
+- Maintain 100% test success rate (expand from 253 to ~280-300 total tests)
+- FeedPage functionality working with proper loading/error/empty states
+- PostCard components displaying all post information correctly
+- Layout system providing consistent structure across all routes
+- Mobile responsive design working on all device sizes
+- Authentication integration maintained from Sprint 3
+- Backend APIs integration working without modifications to Sprint 2 code
