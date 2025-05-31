@@ -4,17 +4,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { AuthProvider } from '../../contexts/AuthContext';
-import { authService } from '../../services/api';
 
-// Mock the auth service
-vi.mock('../../services/api', () => ({
-  authService: {
-    getCurrentUser: vi.fn(),
-    logout: vi.fn(),
-  },
-}));
+// Mock the useAuth hook
+const mockLogout = vi.fn();
+const mockUseAuth = vi.fn();
 
-const mockAuthService = vi.mocked(authService);
+vi.mock('../../contexts/AuthContext', async () => {
+  const actual = await vi.importActual('../../contexts/AuthContext');
+  return {
+    ...actual,
+    useAuth: () => mockUseAuth(),
+  };
+});
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -41,6 +42,13 @@ describe('Header', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLocalStorage.getItem.mockReturnValue(null);
+    // Default unauthenticated state
+    mockUseAuth.mockReturnValue({
+      user: null,
+      logout: mockLogout,
+      loading: false,
+      isAuthenticated: false,
+    });
   });
 
   describe('Basic Structure', () => {
@@ -80,6 +88,12 @@ describe('Header', () => {
   describe('Unauthenticated State', () => {
     beforeEach(() => {
       mockLocalStorage.getItem.mockReturnValue(null);
+      mockUseAuth.mockReturnValue({
+        user: null,
+        logout: mockLogout,
+        loading: false,
+        isAuthenticated: false,
+      });
     });
 
     it('should show login and register links when not authenticated', () => {
@@ -112,6 +126,12 @@ describe('Header', () => {
         user: { id: 1, username: 'testuser', email: 'test@example.com' },
       };
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(mockAuthData));
+      mockUseAuth.mockReturnValue({
+        user: { id: 1, username: 'testuser', email: 'test@example.com' },
+        logout: mockLogout,
+        loading: false,
+        isAuthenticated: true,
+      });
     });
 
     it('should show authenticated navigation when logged in', async () => {
@@ -148,7 +168,13 @@ describe('Header', () => {
         user: { id: 1, username: 'testuser', email: 'test@example.com' },
       };
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(mockAuthData));
-      mockAuthService.logout.mockResolvedValue();
+      mockUseAuth.mockReturnValue({
+        user: { id: 1, username: 'testuser', email: 'test@example.com' },
+        logout: mockLogout,
+        loading: false,
+        isAuthenticated: true,
+      });
+      mockLogout.mockReturnValue(undefined);
     });
 
     it('should handle logout when logout button is clicked', async () => {
@@ -167,7 +193,7 @@ describe('Header', () => {
       fireEvent.click(logoutButton);
 
       await waitFor(() => {
-        expect(mockAuthService.logout).toHaveBeenCalled();
+        expect(mockLogout).toHaveBeenCalled();
       });
     });
   });

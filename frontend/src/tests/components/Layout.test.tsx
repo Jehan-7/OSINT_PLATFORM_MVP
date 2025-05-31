@@ -6,13 +6,17 @@ import { Layout } from '../../components/layout/Layout';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { PostsProvider } from '../../contexts/PostsContext';
 
-// Mock the auth service
-vi.mock('../../services/api', () => ({
-  authService: {
-    getCurrentUser: vi.fn(),
-    logout: vi.fn(),
-  },
-}));
+// Mock the useAuth hook
+const mockLogout = vi.fn();
+const mockUseAuth = vi.fn();
+
+vi.mock('../../contexts/AuthContext', async () => {
+  const actual = await vi.importActual('../../contexts/AuthContext');
+  return {
+    ...actual,
+    useAuth: () => mockUseAuth(),
+  };
+});
 
 // Test wrapper component with all required providers
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -28,6 +32,13 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 describe('Layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default unauthenticated state
+    mockUseAuth.mockReturnValue({
+      user: null,
+      logout: mockLogout,
+      loading: false,
+      isAuthenticated: false,
+    });
   });
 
   describe('Basic Structure', () => {
@@ -213,12 +224,12 @@ describe('Layout', () => {
       render(
         <TestWrapper>
           <Layout>
-            <button>Test Button</button>
+            <button data-testid="test-button">Test Button</button>
           </Layout>
         </TestWrapper>
       );
 
-      const button = screen.getByRole('button');
+      const button = screen.getByTestId('test-button');
       button.focus();
       
       expect(button).toHaveFocus();
