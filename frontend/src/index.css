@@ -1,3 +1,52 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Leaflet CSS for map functionality */
+@import 'leaflet/dist/leaflet.css';
+
+/* Custom map styles to integrate with Tailwind */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-lg;
+}
+
+.leaflet-popup-content {
+  @apply p-0 m-0;
+}
+
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+.custom-marker .marker-icon {
+  @apply w-6 h-6 rounded-full shadow-lg flex items-center justify-center;
+}
+
+.custom-marker .marker-icon::after {
+  content: '';
+  @apply w-2 h-2 bg-white rounded-full;
+}
+
+/* Focus styles for accessibility */
+.leaflet-container:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Loading animation for map skeleton */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
