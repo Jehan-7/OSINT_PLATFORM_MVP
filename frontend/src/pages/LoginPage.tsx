@@ -96,13 +96,25 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Mark all fields as touched
+    // Validate form with current data
+    const errors: FormErrors = {};
+    Object.keys(formData).forEach(key => {
+      const value = formData[key as keyof typeof formData];
+      const error = validateField(key, value);
+      if (error) {
+        errors[key as keyof FormErrors] = error;
+      }
+    });
+
+    // Set all state at once to ensure consistency
     setTouched({
       email: true,
       password: true,
     });
-
-    if (!validateForm()) {
+    setFormErrors(errors);
+    
+    // If there are validation errors, don't proceed
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -130,8 +142,9 @@ export function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <Input
+              id="email"
               label="Email address"
               name="email"
               type="email"
@@ -144,6 +157,7 @@ export function LoginPage() {
             />
 
             <Input
+              id="password"
               label="Password"
               name="password"
               type="password"

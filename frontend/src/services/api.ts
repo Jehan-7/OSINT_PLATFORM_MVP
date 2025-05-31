@@ -46,10 +46,11 @@ class ApiClient {
   private handleError(error: AxiosError): ApiError {
     if (error.response) {
       // Server responded with error status
+      const responseData = error.response.data as any;
       return {
-        message: error.response.data?.message || error.message,
+        message: responseData?.message || error.message,
         status: error.response.status,
-        code: error.response.data?.error || error.code,
+        code: responseData?.error || error.code,
         details: error.response.data,
       };
     } else if (error.request) {

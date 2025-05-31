@@ -234,7 +234,10 @@ describe('RegisterPage - Phase 5', () => {
       fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/username already exists/i)).toBeInTheDocument();
+        // Look for the error message specifically in the username input area
+        const usernameField = screen.getByLabelText(/username/i);
+        const usernameContainer = usernameField.closest('.space-y-1');
+        expect(usernameContainer).toHaveTextContent(/username already exists/i);
       });
     });
 

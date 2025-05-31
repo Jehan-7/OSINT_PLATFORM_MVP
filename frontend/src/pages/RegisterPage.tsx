@@ -24,6 +24,7 @@ export function RegisterPage() {
   
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Client-side validation matching backend rules
   const validateField = (name: string, value: string): string | undefined => {
@@ -71,6 +72,11 @@ export function RegisterPage() {
       }));
     }
     
+    // Reset submitted state when user starts typing
+    if (isSubmitted) {
+      setIsSubmitted(false);
+    }
+    
     if (error) {
       clearError();
     }
@@ -110,14 +116,27 @@ export function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Mark all fields as touched
+    // Validate form with current data
+    const errors: FormErrors = {};
+    Object.keys(formData).forEach(key => {
+      const value = formData[key as keyof typeof formData];
+      const error = validateField(key, value);
+      if (error) {
+        errors[key as keyof FormErrors] = error;
+      }
+    });
+
+    // Set all state at once to ensure consistency
+    setIsSubmitted(true);
     setTouched({
       username: true,
       email: true,
       password: true,
     });
-
-    if (!validateForm()) {
+    setFormErrors(errors);
+    
+    // If there are validation errors, don't proceed
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -153,8 +172,9 @@ export function RegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <Input
+              id="username"
               label="Username"
               name="username"
               type="text"
@@ -162,11 +182,12 @@ export function RegisterPage() {
               value={formData.username}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
-              error={touched.username ? formErrors.username : undefined}
+              error={(touched.username || isSubmitted) ? formErrors.username : undefined}
               placeholder="Enter your username"
             />
 
             <Input
+              id="email-address"
               label="Email address"
               name="email"
               type="email"
@@ -174,11 +195,12 @@ export function RegisterPage() {
               value={formData.email}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
-              error={touched.email ? formErrors.email : undefined}
+              error={(touched.email || isSubmitted) ? formErrors.email : undefined}
               placeholder="Enter your email"
             />
 
             <Input
+              id="password"
               label="Password"
               name="password"
               type="password"
@@ -186,15 +208,23 @@ export function RegisterPage() {
               value={formData.password}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
-              error={touched.password ? formErrors.password : undefined}
+              error={(touched.password || isSubmitted) ? formErrors.password : undefined}
               placeholder="Create a strong password"
             />
 
-            {/* Display general errors */}
-            {(error || formErrors.general) && (
+            {/* Display general errors (non-field specific) */}
+            {(error && !error.includes('Username already exists') && !error.includes('Email already exists')) && (
               <div className="rounded-md bg-red-50 p-4">
                 <div className="text-sm text-red-700">
-                  {error || formErrors.general}
+                  {error}
+                </div>
+              </div>
+            )}
+
+            {formErrors.general && (
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="text-sm text-red-700">
+                  {formErrors.general}
                 </div>
               </div>
             )}

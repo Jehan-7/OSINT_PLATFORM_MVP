@@ -141,3 +141,48 @@
 - Implement pagination with sensible defaults (e.g., 20 posts per page)
 - Ensure public post endpoints don't require authentication
 - Test geospatial edge cases (null coordinates, boundary values)
+
+## Frontend Development Standards (NEW for Sprint 3)
+- Use React 18 + TypeScript + Vite + Tailwind CSS stack
+- Follow React Testing Library best practices for component testing
+- Use React hooks and functional components (no class components)
+- Implement proper TypeScript interfaces for all props and state
+- Use Tailwind utility classes for styling (avoid custom CSS)
+- Store authentication state in React Context with localStorage persistence
+
+## Frontend Testing Requirements (Enhanced)
+- React Testing Library + Jest for frontend component testing
+- Test user interactions (clicks, form submissions, navigation)
+- Mock API calls using MSW or jest mocks for services
+- Test authentication flows end-to-end
+- Minimum 80% test coverage for new frontend code
+
+## Frontend-Backend Integration Standards (NEW)
+- Create dedicated API service modules (authService.ts, etc.)
+- Handle authentication state with React Context
+- Implement proper error handling for API failures
+- Use environment variables for API base URLs (VITE_API_URL)
+- Handle loading states and user feedback properly
+- Validate forms on both client and server side
+
+## Frontend Project Structure (NEW)
+frontend/
+├── src/
+│   ├── components/     # Reusable UI components
+│   ├── pages/         # Route-level components
+│   ├── contexts/      # React contexts (AuthContext)
+│   ├── services/      # API service modules
+│   ├── hooks/         # Custom React hooks
+│   ├── utils/         # Utility functions
+│   └── types/         # TypeScript type definitions
+## Development Environment Requirements
+- Node.js 18+ (LTS recommended)
+- npm 9+
+- Docker & Docker Compose
+- PostgreSQL 15+ with PostGIS
+
+## Setup
+```bash
+# Use Node Version Manager for consistency
+nvm install 20
+nvm use 20
