@@ -1,27 +1,38 @@
-// Central type exports for the OSINT Platform frontend
-
-// Authentication types
+// Main Types Export File
+// Authentication Types (Sprint 3)
 export type {
   AuthSuccessResponse,
+  AuthApiErrorResponse,
   ValidationErrorResponse,
   DuplicateErrorResponse,
   AuthErrorResponse,
   ServerErrorResponse,
-  AuthApiErrorResponse,
   JWTPayload,
   User,
   RegistrationFormData,
   LoginFormData,
   AuthState,
-  AuthContextValue,
+  AuthContextValue
 } from './auth';
 
-// API types
+// API Client Types (Sprint 3)
 export type {
-  HttpMethod,
   ApiConfig,
   ApiError,
-  ApiResponse,
-  RequestConfig,
-  EnvironmentConfig,
-} from './api'; 
+  RequestConfig
+} from './api';
+
+// Posts Types (Sprint 4)
+export type {
+  Post,
+  PaginationData,
+  PostsListResponse,
+  SinglePostResponse,
+  PostApiErrorResponse,
+  PostNotFoundResponse,
+  PostValidationErrorResponse,
+  PostServerErrorResponse,
+  CreatePostData,
+  PostsState,
+  PostsContextValue
+} from './posts'; 
