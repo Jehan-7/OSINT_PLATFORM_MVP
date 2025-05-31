@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { PlusIcon, MapIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const Header: React.FC = () => {
   const { user, logout, loading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -14,8 +17,20 @@ export const Header: React.FC = () => {
     }
   };
 
+  const handleCreatePost = () => {
+    if (user) {
+      navigate('/create-post');
+    } else {
+      navigate('/login', { state: { from: '/create-post' } });
+    }
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
@@ -24,51 +39,73 @@ export const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
           <div className="flex-shrink-0">
-            <Link to="/" className="text-xl font-bold text-gray-900">
-              OSINT Platform
+            <Link to="/" className="flex items-center space-x-2">
+              <EyeIcon className="h-8 w-8 text-blue-600" />
+              <span className="text-xl font-bold text-gray-900">OSINT Platform</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8" aria-label="Main navigation">
+          <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation">
+            {/* Main Navigation Links */}
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/feed"
+                className={`text-gray-700 hover:text-blue-600 font-medium transition-colors ${
+                  isActiveRoute('/feed') ? 'text-blue-600 border-b-2 border-blue-600' : ''
+                }`}
+              >
+                Feed
+              </Link>
+              <Link
+                to="/map"
+                className={`flex items-center text-gray-700 hover:text-blue-600 font-medium transition-colors ${
+                  isActiveRoute('/map') ? 'text-blue-600 border-b-2 border-blue-600' : ''
+                }`}
+              >
+                <MapIcon className="h-4 w-4 mr-1" />
+                Map
+              </Link>
+              
+              {/* Create Post Button */}
+              <button
+                onClick={handleCreatePost}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span>Create Post</span>
+              </button>
+            </div>
+
+            {/* Authentication Section */}
             {user ? (
-              // Authenticated navigation
-              <>
-                <Link
-                  to="/feed"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Feed
-                </Link>
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700 text-sm">
-                    Welcome, {user.username}
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    disabled={loading}
-                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    {loading ? 'Logging out...' : 'Logout'}
-                  </button>
+              <div className="flex items-center space-x-4 border-l border-gray-200 pl-4">
+                <div className="text-sm text-gray-600">
+                  Welcome, <span className="font-medium text-gray-900">{user.username}</span>
                 </div>
-              </>
+                <button
+                  onClick={handleLogout}
+                  disabled={loading}
+                  className="text-gray-700 hover:text-red-600 font-medium transition-colors"
+                >
+                  {loading ? 'Logging out...' : 'Logout'}
+                </button>
+              </div>
             ) : (
-              // Unauthenticated navigation
-              <>
+              <div className="flex items-center space-x-4 border-l border-gray-200 pl-4">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors"
                 >
-                  Register
+                  Sign Up
                 </Link>
-              </>
+              </div>
             )}
           </nav>
 
@@ -110,47 +147,65 @@ export const Header: React.FC = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden" data-testid="mobile-menu">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
+              {/* Main Navigation */}
+              <div className="space-y-3">
+                <Link
+                  to="/feed"
+                  className="block text-gray-700 hover:text-blue-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Feed
+                </Link>
+                <Link
+                  to="/map"
+                  className="block text-gray-700 hover:text-blue-600 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Map View
+                </Link>
+                <button
+                  onClick={() => {
+                    handleCreatePost();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Create Post
+                </button>
+              </div>
+
               {user ? (
-                // Authenticated mobile navigation
-                <>
-                  <Link
-                    to="/feed"
-                    className="text-gray-700 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Feed
-                  </Link>
+                <div className="pt-3 border-t border-gray-100 mt-3">
                   <div className="px-3 py-2">
-                    <span className="text-gray-700 text-sm block mb-2">
-                      Welcome, {user.username}
-                    </span>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Signed in as <span className="font-medium text-gray-900">{user.username}</span>
+                    </p>
                     <button
                       onClick={handleLogout}
                       disabled={loading}
-                      className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors w-full"
+                      className="text-red-600 font-medium"
                     >
                       {loading ? 'Logging out...' : 'Logout'}
                     </button>
                   </div>
-                </>
+                </div>
               ) : (
-                // Unauthenticated mobile navigation
-                <>
+                <div className="space-y-3 pt-3 border-t border-gray-100 mt-3">
                   <Link
                     to="/login"
-                    className="text-gray-700 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
+                    className="block text-gray-700 hover:text-blue-600 font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="bg-blue-600 hover:bg-blue-700 text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="block bg-gray-100 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Register
+                    Sign Up
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>

@@ -52,7 +52,7 @@ export class PostsService {
   }
 
   /**
-   * Create new post (for future use)
+   * Create new post
    * POST /api/v1/posts
    * Matches backend post controller exactly
    */
@@ -79,4 +79,8 @@ export class PostsService {
 
 // Export singleton instance
 export const postsService = new PostsService();
+
+// Export individual functions for easier testing
+export const { fetchPosts, fetchPostById, createPost } = postsService;
+
 export default postsService; 

@@ -7,6 +7,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { HomePage } from './pages/HomePage';
 import { FeedPage } from './pages/FeedPage';
+import { MapViewPage } from './pages/MapViewPage';
+import { CreatePostPage } from './pages/CreatePostPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -20,6 +22,15 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/feed" element={<FeedPage />} />
+              <Route path="/map" element={<MapViewPage />} />
+              <Route 
+                path="/create-post" 
+                element={
+                  <ProtectedRoute>
+                    <CreatePostPage />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/dashboard" 
                 element={
